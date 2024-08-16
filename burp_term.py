@@ -40,10 +40,11 @@ def http_req_parse():
 	print("Paste your post request below to end paste <enter>EOF:\n")
 	lines = []
 	while True:
-		line = input()
-		if line in ["EOF", "EOf", "EoF", "eOF", "Eof", "eof", "eoF"]:
+		try:
+			line = input()
+			lines.append(line)
+		except EOFError:
 			break
-		lines.append(line)
 	return lines
 
 def main_help():
@@ -55,17 +56,18 @@ def main_help():
 def main():
 	print(f"Welcome {user} to BurpTerm!")
 	main_help()
-	while True:
-		uin = input(f"{user}::>").lower()
-		if uin == "exit":
-			break
-		parser = uin.split(" ")
-		if parser[0] == "set":
-			if parser[1] == "proxy":
-				if ":" in parser[2]:
-					socket = parser[2]
-					if int(parser[2].split(":")[1]) > 65535:
-						print(f"Invalid Port number {int(parser[2].split(":")[1])}")
+	test = http_req_parse()
+	print(test)
+	
+	# while True:
+	# 	uin = input(f"{user}::>").lower()
+	# 	if uin == "exit":
+	# 	if parser[0] == "set":
+	# 		if parser[1] == "proxy":
+	# 			if ":" in parser[2]:
+	# 				socket = parser[2]
+	# 				if int(parser[2].split(":")[1]) > 65535:
+	# 					print(f"Invalid Port number {int(parser[2].split(':')[1])}")
 						
 				
 
