@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import socket
 import requests
+import re
 
 class target():
     def __init__(self, ip: str, port: int, scheme: str, target_id: int):
         self.target_id=target_id
         self.ip = ip
         self.port = port
-        self.socket = self.ip+":"+self.port
+        self.socket = self.ip+":"+str(self.port)
         self.scheme = scheme
         self.params = {}
         self.args=""
@@ -38,49 +39,51 @@ class workspace():
     def workspace_help(self):
         print("Options:")
         print("\tadd\t:\tcreates target, 127.0.0.1:1337 OR http://127.0.0.1:1337/")
-        print("\tset\t:\tset workspace, takes workspace_id")
-        print("\trm\t:\tremove workspaces, takes workspace_id")
-        print("\tls\t:\tlist workspaces")
+        print("\tset\t:\tset <variable> <target_id> <value>")
+        print("\trm\t:\tremove target, takes workspace_id")
+        print("\tls\t:\tlist targets")
         print("\thelp")
         print("\tback goes back to workspaces\n")
-        print("[*] Default workspace session id is 0\n")
-
-    # def import_target_list(path: str):
-    #     with open(path, 'r') as file:
-    #         for i in file:
-    #             if '://' in i:
-    #                 tmp = i.split("://")
-
-    #                 # TODO
-    #                 #socket.getservbyname(tmp[0])
-    #                 # then get the port if there is one, if not set default
-    #     file.close()
 
     def interact(self):
-        # (?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])
-        # ((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?):([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])
-        # ([a-z][a-z0-9+\-.]*)://((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?):([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])
-        # (([a-z][a-z0-9+\-.]*)://)?((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?):([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])
+        pattern = re.compile(
+            '(?P<scheme>(([a-z][a-z0-9+\-.]*)://)?)(?P<ip>((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)):?(?P<port>([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])?)'
+        )
+
+        print("Past Compile")
         tid = 0
-        cmds = ["add", "set", "rm", "ls", "help", "exit"]
+        cmds = ["add", "set", "rm", "ls", "help", "exit", "back"]
         print(f"[*] Welcome to interactive mode!")
         self.workspace_help()
         while True:
-            user_input = input("workspace::>>")
+            user_input=""
+            cmd=""
+            user_input = input(f"workspace{self.workspace_id}::>>")
+            cmd = user_input.split(" ")
             if cmd[0] in cmds:
                 if cmd[0] == "add":
-                    
-                    self.targets.append(target)
-                elif cmd[0] == "set":
+                    m = re.search(pattern, user_input)
+                    if m:
+                        c = m.groupdict()
+                        c['port'] = c['port'] if c["port"] else socket.getservbyname(c["scheme"].removesuffix("://"))
+                        self.targets.append(target(c['ip'], c['port'], c['scheme'], target_id=tid))
+                        print(f"[+] Successfully aded target {self.targets[tid].scheme}{self.targets[tid].socket}")
+                        tid+=1
+                    else:
+                        print(m)
+                if cmd[0] == "set":
                     pass
-                elif cmd[0] == "rm":
+                if cmd[0] == "rm":
                     pass
-                elif cmd[0] == "ls":
+                if cmd[0] == "ls":
+                    for i in self.targets:
+                        print(f"{self.targets.index(i)}) {i.ip}:{i.port}")
+                if cmd[0] == "help":
                     pass
-                elif cmd[0] == "help":
-                    pass
-                elif cmd[0] == "back":
-                    pass
+                if cmd[0] == "back":
+                    print("In back")
+                    return
+            
 
 
 
@@ -92,7 +95,6 @@ def main_help():
     print("\tls\t:\tlist workspaces")
     print("\thelp")
     print("\texit\n")
-    print("[*] Default workspace session id is 0\n")
 
 def main():
     cmds = ["create", "set", "rm", "ls", "help", "exit"]
@@ -100,6 +102,7 @@ def main():
     workspaces=[]
     workspaces.append(workspace(wsid))
     wsid+=1
+    print("[+] Created default workspace @ id 0\n")
     main_help()
     while True:
         user_input = input("burp_term::>>").lower()
@@ -111,6 +114,7 @@ def main():
             elif cmd[0] == "set":
                 if len(cmd) == 2:
                     workspaces[int(cmd[1])].interact()
+                    cmd = ""
                 elif len(cmd) > 2:
                     raise OverflowError(f"[!] Too many arguments!")
                     continue
