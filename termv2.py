@@ -2,6 +2,7 @@
 import socket
 import requests
 import re
+from urllib.parse import urlparse
 
 class target():
     def __init__(self, ip: str, port: int, scheme: str, target_id: int):
@@ -46,10 +47,6 @@ class workspace():
         print("\tback goes back to workspaces\n")
 
     def interact(self):
-        pattern = re.compile(
-            '(?P<scheme>(([a-z][a-z0-9+\-.]*)://)?)(?P<ip>((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)):?(?P<port>([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])?)'
-        )
-
         print("Past Compile")
         tid = 0
         cmds = ["add", "set", "rm", "ls", "help", "exit", "back"]
@@ -62,15 +59,20 @@ class workspace():
             cmd = user_input.split(" ")
             if cmd[0] in cmds:
                 if cmd[0] == "add":
-                    m = re.search(pattern, user_input)
-                    if m:
-                        c = m.groupdict()
-                        c['port'] = c['port'] if c["port"] else socket.getservbyname(c["scheme"].removesuffix("://"))
-                        self.targets.append(target(c['ip'], c['port'], c['scheme'], target_id=tid))
+                    if "//" not in cmd [1]:
+                        cmd[1]="//"+cmd[1]
+                    t = urlparse(cmd[1])
+                    if t:
+                        try:
+                            p = t.netloc.split(":")[1] if ':' in t.netloc else socket.getservbyname(t.scheme)
+                        except OSError:
+                            print(f"[*] Unrecognized port for scheme translation {t.netloc.split(':')[1]}.. Just a warning, continuing...")
+                            continue
+                        self.targets.append(target(ip=t.netloc.split(':')[0], port=p, scheme=t.scheme, target_id=tid))
                         print(f"[+] Successfully aded target {self.targets[tid].scheme}{self.targets[tid].socket}")
                         tid+=1
                     else:
-                        print(m)
+                       print(f"Invalid target: {cmd[0]}")
                 if cmd[0] == "set":
                     pass
                 if cmd[0] == "rm":
@@ -84,9 +86,6 @@ class workspace():
                     print("In back")
                     return
             
-
-
-
 def main_help():
     print("Options:")
     print("\tcreate\t:\tcreates workspaces, auto increments id")
