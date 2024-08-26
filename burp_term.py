@@ -1,85 +1,160 @@
 #!/usr/bin/env python3
+import socket
 import requests
-import urllib3
-import os
-from random_user_agent.user_agent import UserAgent
-from random_user_agent.params import SoftwareName, OperatingSystem
+import re
+from urllib.parse import urlparse
 
-try:
-	shell = os.getenv("SHELL")
-	user = os.getenv("USER")
-	pwd = os.getenv("PWD")
-except:
-	print("Are you in linux?")
+class target():
+    def __init__(self, ip: str, port: int, scheme: str, target_id: int):
+        self.target_id=target_id
+        self.ip = ip
+        self.port = port
+        self.socket = self.ip+":"+str(self.port)
+        self.scheme = scheme
+        self.params = {}
+        self.args=""
+        self.injections=""
+        self.username=""
+        self.password=""
+        self.proxy=""
+        self.user_agent=""
 
-session  = requests.Session()
+    def show_target_options(self):
+        print("ip: %s"% self.ip)
+        print("port: %s"% self.port)
+        print("scheme: %s"% self.scheme)
+        print("params: %s"% self.params)
+        print("args: %s"% self.args)
+        print("injections: %s"% self.injections)
+        print("username: %s"% self.username)
+        print("password: %s"% self.password)
+        print("proxy: %s"% self.proxy)
+        print("Useragent: %s"% self.user_agent)
 
-def get_random_ua():
-	software_names = [SoftwareName.CHROME.value]
-	operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]   
-	user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
-	user_agent_rotator.get_random_user_agent()
-	user_agent = user_agent_rotator.get_random_user_agent()
-	return user_agent
+class workspace():
+    def __init__(self, workspace_id):
+        self.name=str(workspace_id)
+        self.workspace_id = workspace_id
+        self.targets=[]
+    
+    def workspace_help(self):
+        print("Options:")
+        print("\tadd\t:\tcreates target, 127.0.0.1:1337 OR http://127.0.0.1:1337/")
+        print("\tset\t:\tset <variable> <target_id> <value>")
+        print("\tshow\t:\tshow <target_id>")
+        print("\trm\t:\tremove target, takes workspace_id")
+        print("\tls\t:\tlist targets")
+        print("\thelp")
+        print("\tback goes back to workspaces\n")
 
-def set_proxy(userin):
-	session.proxies.update(f"http://{userin}")
-
-def sqli_help():
-	print("sqli help:\n")
-	print("\tset post file /path/to/post/file")
-	print("\tshow opts/options")
-	print("\tset params param1=2&param2=3")
-
-def sqli_menu():
-	sqli_help()
-	opts = post_parse()
-	#opts[0]
-
-def http_req_parse():
-	print("Paste your post request below to end paste <enter>EOF:\n")
-	lines = []
-	while True:
-		try:
-			line = input()
-			lines.append(line)
-		except EOFError:
-			break
-	return lines
-
+    def interact(self):
+        print("Past Compile")
+        tid = 0
+        cmds = ["add", "set", "edit", "show", "rm", "ls", "help", "exit", "back"]
+        print(f"[*] Welcome to interactive mode!")
+        self.workspace_help()
+        while True:
+            user_input=""
+            cmd=""
+            user_input = input(f"workspace{self.workspace_id}::>>").lower()
+            cmd = user_input.split(" ")
+            if cmd[0] in cmds:
+                if cmd[0] == "add":
+                    if "//" not in cmd [1]:
+                        cmd[1]="//"+cmd[1]
+                    t = urlparse(cmd[1])
+                    if t:
+                        try:
+                            p = t.netloc.split(":")[1] if ':' in t.netloc else socket.getservbyname(t.scheme)
+                        except OSError:
+                            print(f"[*] Unrecognized port for scheme translation {t.netloc.split(':')[1]}.. Just a warning, continuing...")
+                            continue
+                        self.targets.append(target(ip=t.netloc.split(':')[0], port=p, scheme=t.scheme, target_id=tid))
+                        print(f"[+] Successfully aded target {self.targets[tid].scheme}{self.targets[tid].socket}")
+                        tid+=1
+                    else:
+                       print(f"Invalid target: {cmd[0]}")
+                if cmd[0] == "set":
+                    pass
+                if cmd[0] == "edit":
+                    if '=' in user_input:
+                        tmp_cmd = user_input.split(' ', 2)[2]
+                        # TODO
+                    # for t in self.targets:
+                    #     if t.target_id==int(cmd[1]):
+                    #         p = len(cmd)-2
+                    #         for cid in range(2,p):
+                    #             print(cmd[cid])
+                if cmd[0] == "show":
+                    for i in self.targets:
+                        if i.target_id == int(cmd[1]):
+                            i.show_target_options()
+                if cmd[0] == "rm":
+                    pass
+                if cmd[0] == "ls":
+                    for i in self.targets:
+                        print(f"{i.target_id}) {i.ip}:{i.port}")
+                if cmd[0] == "help":
+                    pass
+                if cmd[0] == "back":
+                    print("In back")
+                    return
+            
 def main_help():
-	print(f"The usage of burp_term.py is similar to metasploit.")
-	print("You can use burp proxy as well!")
-	print("\tuse sqli")
-	print("\tset proxy 127.0.0.1:8080")
+    print("Options:")
+    print("\tcreate\t:\tcreates workspaces, auto increments id")
+    print("\tset\t:\tset workspace, takes workspace_id")
+    print("\trm\t:\tremove workspaces, takes workspace_id")
+    print("\tls\t:\tlist workspaces")
+    print("\thelp")
+    print("\texit\n")
 
 def main():
-	print(f"Welcome {user} to BurpTerm!")
-	main_help()
-	test = http_req_parse()
-	print(test)
-	
-	# while True:
-	# 	uin = input(f"{user}::>").lower()
-	# 	if uin == "exit":
-	# 	if parser[0] == "set":
-	# 		if parser[1] == "proxy":
-	# 			if ":" in parser[2]:
-	# 				socket = parser[2]
-	# 				if int(parser[2].split(":")[1]) > 65535:
-	# 					print(f"Invalid Port number {int(parser[2].split(':')[1])}")
-						
-				
+    cmds = ["create", "set", "rm", "ls", "help", "exit"]
+    wsid = 0 # Start workspace id's at 0
+    workspaces=[]
+    workspaces.append(workspace(wsid))
+    wsid+=1
+    print("[+] Created default workspace @ id 0\n")
+    main_help()
+    while True:
+        user_input = input("burp_term::>>").lower()
+        cmd = user_input.split(' ')
+        if cmd[0] in cmds:
+            if cmd[0] == "create":
+                workspaces.append(workspace(wsid))
+                wsid+=1
+            elif cmd[0] == "set":
+                if len(cmd) == 2:
+                    workspaces[int(cmd[1])].interact()
+                    cmd = ""
+                elif len(cmd) > 2:
+                    raise OverflowError(f"[!] Too many arguments!")
+                    continue
+                else:
+                    raise ValueError(f"[!] Too little arguments!")
+                    continue
+            elif cmd[0] == "rm":
+                if len(cmd) == 2:
+                    workspaces.pop(int(cmd[1]))
+                elif len(cmd) > 2:
+                    raise OverflowError(f"[!] Too many arguments!")
+                    continue
+                else:
+                    raise ValueError(f"[!] Too little arguments!")
+                    continue
+            elif cmd[0] == "ls":
+                for i in workspaces:
+                    print(f"{workspaces.index(i)}) {i.name}")
+            elif cmd[0] == "help":
+                main_help()
+            elif cmd[0] == "exit":
+                exit()
+                
+        else:
+            raise TypeError("[!] Invalid command: %s"%user_input)
+            continue
 
-	#sqli_menu()
-		
-# GET / HTTP/1.1
-# Host: example.org
-# User-Agent: user_agent_rotator.get_user_agent()
-# Accept: */*
-# Connection: keep-alive
 
-
-	
-if __name__== '__main__':
-	main()
+if __name__=="__main__":
+    main()
