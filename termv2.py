@@ -21,7 +21,7 @@ class target():
 
     def show_target_options(self):
         print("ip: %s"% self.ip)
-        print("port: %d"% self.port)
+        print("port: %s"% self.port)
         print("scheme: %s"% self.scheme)
         print("params: %s"% self.params)
         print("args: %s"% self.args)
@@ -41,6 +41,7 @@ class workspace():
         print("Options:")
         print("\tadd\t:\tcreates target, 127.0.0.1:1337 OR http://127.0.0.1:1337/")
         print("\tset\t:\tset <variable> <target_id> <value>")
+        print("\tshow\t:\tshow <target_id>")
         print("\trm\t:\tremove target, takes workspace_id")
         print("\tls\t:\tlist targets")
         print("\thelp")
@@ -49,13 +50,13 @@ class workspace():
     def interact(self):
         print("Past Compile")
         tid = 0
-        cmds = ["add", "set", "rm", "ls", "help", "exit", "back"]
+        cmds = ["add", "set", "edit", "show", "rm", "ls", "help", "exit", "back"]
         print(f"[*] Welcome to interactive mode!")
         self.workspace_help()
         while True:
             user_input=""
             cmd=""
-            user_input = input(f"workspace{self.workspace_id}::>>")
+            user_input = input(f"workspace{self.workspace_id}::>>").lower()
             cmd = user_input.split(" ")
             if cmd[0] in cmds:
                 if cmd[0] == "add":
@@ -75,11 +76,24 @@ class workspace():
                        print(f"Invalid target: {cmd[0]}")
                 if cmd[0] == "set":
                     pass
+                if cmd[0] == "edit":
+                    if '=' in user_input:
+                        tmp_cmd = user_input.split(' ', 2)[2]
+                        
+                    # for t in self.targets:
+                    #     if t.target_id==int(cmd[1]):
+                    #         p = len(cmd)-2
+                    #         for cid in range(2,p):
+                    #             print(cmd[cid])
+                if cmd[0] == "show":
+                    for i in self.targets:
+                        if i.target_id == int(cmd[1]):
+                            i.show_target_options()
                 if cmd[0] == "rm":
                     pass
                 if cmd[0] == "ls":
                     for i in self.targets:
-                        print(f"{self.targets.index(i)}) {i.ip}:{i.port}")
+                        print(f"{i.target_id}) {i.ip}:{i.port}")
                 if cmd[0] == "help":
                     pass
                 if cmd[0] == "back":
