@@ -1,79 +1,38 @@
-# Target and Workspace Management Script
+# burp_term
 
-## Overview
+[!WARNING]  
+This script is provided for educational and lawful purposes only. The author is not responsible for any misuse or illegal activities carried out with this tool. Users are required to ensure they have explicit permission and signed consent from the target party before executing this script. Always operate within the boundaries of the law and ethical standards.
 
-This Python script provides a basic framework for managing targets and workspaces. It allows users to create and manipulate targets and workspaces interactively through a command-line interface. The script features two main classes: `target` and `workspace`, and supports various commands for managing these entities.
+`burp_term` is a Python-based tool designed to automate HTTP requests for SQL injection and brute-forcing attacks, with added functionality to manage targets and workspaces interactively.
 
-## Classes
+## Recent Changes
+- **New Module:** `httpBrute.py` added for web brute-forcing.
+- **Improved Core Logic:** `burp_term.py` refined for better target handling and error management.
 
-### `target`
+## Features
+- Organize and manage multiple targets via **workspaces**.
+- Perform SQL injections and web brute-force attacks with **automated HTTP requests**.
+- Interactive command-line operations for workspace management.
 
-The `target` class represents a network target with the following attributes:
+## Installation
+```bash
+git clone https://github.com/cryp71c/burp_term.git
+cd burp_term
+python3 -m pip install -r requirements.txt
+```
 
-- `ip` (str): The IP address of the target.
-- `port` (int): The port number of the target.
-- `scheme` (str): The URL scheme (e.g., `http`, `https`).
-- `target_id` (int): An identifier for the target.
-- `socket` (str): A string representation of the target's IP and port.
-- `params` (dict): Parameters for the target.
-- `args` (str): Arguments for the target.
-- `injections` (str): Injection strings for the target.
-- `username` (str): Username for authentication.
-- `password` (str): Password for authentication.
-- `proxy` (str): Proxy settings for the target.
-- `user_agent` (str): User agent string for requests.
-
-Methods:
-- `show_target_options()`: Displays the attributes of the target.
-
-### `workspace`
-
-The `workspace` class represents a workspace that can contain multiple targets. It includes the following attributes:
-
-- `name` (str): The name of the workspace.
-- `workspace_id` (int): An identifier for the workspace.
-- `targets` (list): A list of `target` instances associated with the workspace.
-
-Methods:
-- `workspace_help()`: Displays available commands for workspace management.
-- `interact()`: Enters an interactive mode for managing targets within the workspace.
-
-## Functions
-
-### `main_help()`
-
-Displays available commands for managing workspaces.
-
-### `main()`
-
-The main function that drives the script. It initializes the default workspace and handles user input for workspace management commands.
-
-## Commands
-
-### Workspace Commands
-
-- `add <url>`: Adds a new target to the workspace. The URL can be in the format `http://<ip>:<port>` or `<ip>:<port>`.
-- `set <variable> <target_id> <value>`: Sets a variable for a specific target (functionality not yet implemented).
-- `edit <target_id> <params>`: Edits the parameters of a target (functionality not yet implemented).
-- `show <target_id>`: Displays the details of a specific target.
-- `rm <target_id>`: Removes a target from the workspace.
-- `ls`: Lists all targets in the workspace.
-- `help`: Displays help information for workspace commands.
-- `back`: Returns to the previous menu.
-
-### Main Commands
-
-- `create`: Creates a new workspace.
-- `set <workspace_id>`: Sets the current workspace to the specified ID.
-- `rm <workspace_id>`: Removes a workspace by ID.
-- `ls`: Lists all available workspaces.
-- `help`: Displays help information for main commands.
-- `exit`: Exits the script.
+## Modules
+### httpBrute.py
+This module contains the httpBrute force class as well as an SQLi class. 
+Eventually both of these will be able to be run independently using the following syntax:
+```bash
+python3 burp_term.py -m httpBrute -u http://127.0.0.1:8080/admin/index.php -U /path/to/user/file -P /path/to/pass/file --param "username=^USER^&password=^PASSWORD^"
+python3 burp_term.py -m SQLi -u http://127.0.0.1:8080/admin/index.php --param "username=^INJ^&password=fakepass"
+```
+I really liked, hydra's and burpsuites inject syntax, but for me they felt too slow, I will also allow the printing of content length, and response codes.
 
 ## Usage
-
-To run the script, use the following command:
-
+Run the tool interactively:
 ```bash
-python script_name.py
-
+python3 burp_term.py
+```
