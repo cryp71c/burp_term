@@ -1,7 +1,7 @@
 # burp_term
 
-[!WARNING]  
-This script is provided for educational and lawful purposes only. The author is not responsible for any misuse or illegal activities carried out with this tool. Users are required to ensure they have explicit permission and signed consent from the target party before executing this script. Always operate within the boundaries of the law and ethical standards.
+> [!WARNING]  
+> This script is provided for educational and lawful purposes only. The author is not responsible for any misuse or illegal activities carried out with this tool. Users are required to ensure they have explicit permission and signed consent from the target party before executing this script. Always operate within the boundaries of the law and ethical standards.
 
 `burp_term` is a Python-based tool designed to automate HTTP requests for SQL injection and brute-forcing attacks, with added functionality to manage targets and workspaces interactively.
 
