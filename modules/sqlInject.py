@@ -2,7 +2,7 @@ import requests
 import mimetypes
 from requests.exceptions import ConnectionError
 
-class httpBrute:
+class sqlinject:
     def __init__(self, scheme, ip, port, payload, 
                  login_path, user, user_file, password, 
                  password_file, user_agent, mimetype='text/plain', 
@@ -21,9 +21,5 @@ class httpBrute:
         self.session = requests.Session()
         self.headers = {'Content-Type': {self.mimetype}}
         
-    def brute():
-        self.session.get(url, headers=headers, verify=False)
-        self.sess.post(url + login_path, data=payload, headers=headers, verify=False, cookies=self.session.cookies)        
-
-# Check for arguments
-#print("""[*] Usage: python3 apsystem_sqli.py http://127.0.0.1 --login-path /app/login.php --payload "param1=^USER^&param2=^PASS^" --proxy http://127.0.0.1:8080""")
+    def inject():
+        pass

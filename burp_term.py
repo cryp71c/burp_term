@@ -2,8 +2,9 @@
 import socket
 import requests
 import re
+import argparse
 from urllib.parse import urlparse
-from modules import httpBrute
+from modules import httpBrute, sqlInject
 
 class target():
     def __init__(self, ip: str, port: int, scheme: str, target_id: int):
@@ -76,7 +77,7 @@ class workspace():
                             print(f"[*] Unrecognized port for scheme translation {t.netloc.split(':')[1]}.. Just a warning, continuing...")
                             continue
                         self.targets.append(target(ip=t.netloc.split(':')[0], port=p, scheme=t.scheme, target_id=tid))
-                        print(f"[+] Successfully aded target {self.targets[tid].scheme}{self.targets[tid].socket}")
+                        print(f"[+] Successfully aded target {self.targets[tid].scheme}://{self.targets[tid].socket}/")
                         tid+=1
                     else:
                        print(f"Invalid target: {cmd[0]}")
@@ -103,18 +104,17 @@ class workspace():
 
                         if vrfy.lower() in ['y', 'yes']:
                             bruter = httpBrute.httpBrute(
-                                        scheme=self.targets[tid].scheme,
-                                        ip=self.targets[tid].ip,
-                                        port=self.targets[tid].port,
+                                        scheme=self.targets[tid].scheme, 
+                                        ip=self.targets[tid].ip,port=self.targets[tid].port,
                                         payload=self.targets[tid].payload,
                                         login_path=self.targets[tid].login_path,
                                         mimetype=self.targets[tid].mimetype,
                                         proxy=self.targets[tid].proxy,
-                                        user_agent=self.targets[tid]user_agent,
-                                        user = self.targets[tid]user,
-                                        user_file = self.targets[tid]user_file,
-                                        password = self.targets[tid]password,
-                                        password_file= self.targets[tid]password_file
+                                        user_agent=self.targets[tid].user_agent,
+                                        user = self.targets[tid].user,
+                                        user_file = self.targets[tid].user_file,
+                                        password = self.targets[tid].password,
+                                        password_file= self.targets[tid].password_file
                                         )
                         else:
                             print("[+] Copy that! Fix it!")
@@ -189,5 +189,21 @@ def main():
             raise TypeError("[!] Invalid command: %s"%user_input)
             continue
 
+def run_httpBrute():
+    pass
+
+def run_sqlInject():
+    pass
+
 if __name__=="__main__":
+    # python3 burp_term.py --module httpBrute -u http://127.0.0.1:8080/admin/index.php -U /path/to/user/file -P /path/to/pass/file --params "username=^USER^&password=^PASSWORD^"
+    # python3 burp_term.py --module SQLi -u http://127.0.0.1:8080/admin/index.php --params "username=^INJ^&password=fakepass"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--module", choices=["httpBrute", "sqlInject|SQLi"], required=False)
+    parser.add_argument("-u", "--url",  required=False)
+    parser.add_argument("-U", "--user", help="username or file", required=False)
+    parser.add_argument("-P", "--pass", help="password or file", required=False)
+    parser.add_argument("-p", "--params", help="password or file", required=False)
+    args = parser.parse_args()
+
     main()
