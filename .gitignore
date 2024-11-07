@@ -2,4 +2,4 @@
 .venv
 
 # Ignore cache file
-__pycache__
+**/__pycache__
